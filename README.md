@@ -9,14 +9,13 @@ A secure and robust wallet system with bank integration capabilities.
 - Bank Account Integration
 - Transaction History
 - Profile Management
-- KYC Verification
 - 2FA Support
 
 ## Prerequisites
 
 - Node.js (v14 or higher)
 - PostgreSQL
-- npm or yarn
+- npm
 
 ## Setup Instructions
 
@@ -34,9 +33,9 @@ npm install
 3. Set up environment variables
 Create a `.env` file in the root directory with the following variables:
 ```env
-DATABASE_URL="postgresql://postgres:your_password@localhost:5432/wallet-system?schema=public"
+DATABASE_URL=""
 JWT_SECRET="your_secure_jwt_secret"
-PORT=3000
+PORT=5000
 ```
 
 4. Set up the database
@@ -155,7 +154,7 @@ Content-Type: application/json
 - Password Hashing
 - Rate Limiting
 - Input Validation
-- 2FA Support
+
 
 ## Contributing
 
@@ -165,6 +164,3 @@ Content-Type: application/json
 4. Push to the branch
 5. Create a Pull Request
 
-## License
-
-This project is licensed under the ISC License. 
