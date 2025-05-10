@@ -1,0 +1,97 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String           @id @default(uuid())
+  email        String           @unique
+  phone        String           @unique
+  password     String
+  is2FAEnabled Boolean          @default(false)
+  otpSecret    String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  profile      Profile?
+  wallet       Wallet?
+  transactions Transaction[]    @relation("UserTransactions")
+  bankAccounts UserBankAccount[]
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  firstName   String
+  lastName    String
+  address     String
+  dateOfBirth DateTime
+  kycVerified Boolean  @default(false)
+}
+
+model Wallet {
+  id           String        @id @default(uuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id])
+  balance      Float         @default(0.0)
+  currency     String        @default("INR")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[] @relation("WalletTransactions")
+}
+
+model Bank {
+  id            String           @id @default(uuid())
+  name          String           @unique  // e.g., "HDFC", "SBI"
+  code          String           @unique  // e.g., "hdfc", "sbi"
+  maxLimit      Float            // e.g., 10000 for HDFC, 15000 for SBI
+  isActive      Boolean          @default(true)
+  accounts      UserBankAccount[]
+  transactions  Transaction[]
+  createdAt     DateTime         @default(now())
+}
+
+model UserBankAccount {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  bankId    String
+  bank      Bank     @relation(fields: [bankId], references: [id])
+  accountNo String   // Mock account number
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, bankId, accountNo])
+}
+
+model Transaction {
+  id           String           @id @default(uuid())
+  walletId     String
+  wallet       Wallet           @relation(fields: [walletId], references: [id], name: "WalletTransactions")
+  userId       String?
+  user         User?            @relation(fields: [userId], references: [id], name: "UserTransactions")
+  amount       Float
+  type         TransactionType
+  status       TransactionStatus @default(PENDING)
+  counterparty String?          // user ID or bank ID
+  bankId       String?          // Only for bank transfers
+  bank         Bank?            @relation(fields: [bankId], references: [id])
+  description  String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
